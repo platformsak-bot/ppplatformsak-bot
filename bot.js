@@ -1,7 +1,20 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+
+// إعدادات البولينج المحسنة
+const bot = new TelegramBot(token, { 
+  polling: {
+    interval: 300,
+    autoStart: true,
+    params: {
+      timeout: 10
+    }
+  }
+});
+
+// تأكيد استخدام البولينج
+bot.setWebHook('');
 
 // بيانات التخزين
 let userSessions = {};
@@ -10,6 +23,16 @@ let cvData = {};
 let cvStep = {};
 let reminders = {};
 let flashcards = {};
+
+// معالجة الأخطاء المحسنة
+bot.on('polling_error', (error) => {
+  console.error('❌ خطأ في البولينج:', error.code);
+  console.log('🔄 البوت يحاول إعادة الاتصال تلقائياً...');
+});
+
+bot.on('error', (error) => {
+  console.error('❌ خطأ عام:', error.message);
+});
 
 // ↪️ زر العودة للقائمة الرئيسية
 bot.onText(/↩️ العودة للقائمة الرئيسية/, (msg) => {
@@ -65,7 +88,7 @@ bot.onText(/🔍 خدمات الأبحاث/, (msg) => {
 - 🆕 طلب بحث جديد
 
 📧 للتواصل: alslahyamr1@gmail.com
-📞 الواتساب: 733071578`, researchKeyboard);
+📞 الواتساب: @Almariffah`, researchKeyboard);
 });
 
 // 📄 أمثلة الأبحاث
@@ -74,7 +97,7 @@ bot.onText(/📄 رؤية أمثلة الأبحاث/, (msg) => {
 
 يمكنك طلب أمثلة PDF عبر:
 📧 alslahyamr1@gmail.com 
-📞 733071578
+📞 @Almariffah
 
 وسنرسل لك نماذج مجانية لأبحاثنا السابقة`);
 });
@@ -159,7 +182,7 @@ bot.onText(/💼 السيرة الذاتية/, (msg) => {
 2. اتبع الخطوات وأدخل معلوماتك
 3. سنقوم بإنشاء CV احترافي لك
 
-📞 للاستفسار: 733071578`, cvKeyboard);
+📞 للاستفسار: @Almariffah`, cvKeyboard);
 });
 
 // 📝 بدء تعبئة السيرة الذاتية
@@ -198,7 +221,7 @@ bot.onText(/🎯 المشاريع الدراسية/, (msg) => {
 - التوثيق الكامل
 
 📧 alslahyamr1@gmail.com
-📞 733071578`, projectKeyboard);
+📞 @Almariffah`, projectKeyboard);
 });
 
 // 🚀 طلب مشروع جديد
@@ -512,7 +535,7 @@ bot.onText(/ℹ️ المساعدة/, (msg) => {
   const helpText = `🆘 **مساعدة PlatformSAK**
 
 📞 **للتواصل المباشر:**
-733071578
+@Almariffah
 
 📧 **البريد الإلكتروني:**
 alslahyamr1@gmail.com
@@ -548,28 +571,28 @@ bot.on('message', (msg) => {
   
   if (userSessions[chatId] === 'research_request') {
     sendToAdmin(chatId, `🔍 طلب بحث جديد\n\n${messageText}`);
-    bot.sendMessage(chatId, `✅ تم استلام طلب البحث!\n\nسنقوم بالتواصل معك خلال ساعات\n📞 للاستفسار: 733071578`);
+    bot.sendMessage(chatId, `✅ تم استلام طلب البحث!\n\nسنقوم بالتواصل معك خلال ساعات\n📞 للاستفسار: @Almariffah`);
     delete userSessions[chatId];
     return;
   }
   
   if (userSessions[chatId] === 'project_request') {
     sendToAdmin(chatId, `🎯 طلب مشروع جديد\n\n${messageText}`);
-    bot.sendMessage(chatId, `✅ تم استلام طلب المشروع!\n\nسنقوم بالتواصل معك خلال ساعات\n📞 للاستفسار: 733071578`);
+    bot.sendMessage(chatId, `✅ تم استلام طلب المشروع!\n\nسنقوم بالتواصل معك خلال ساعات\n📞 للاستفسار: @Almariffah`);
     delete userSessions[chatId];
     return;
   }
   
   if (waitingForAssignment[chatId]) {
     if (photo) {
-      bot.sendPhoto(733071578, photo[photo.length - 1].file_id, {
+      bot.sendPhoto('@Almariffah', photo[photo.length - 1].file_id, {
         caption: `📝 واجب جديد\nرقم التواصل: ${chatId}\n\n${messageText}`
       });
     } else {
       sendToAdmin(chatId, `📝 واجب جديد\n\n${messageText}`);
     }
     
-    bot.sendMessage(chatId, `✅ تم استلام واجبك!\n\nسنقوم بالحل خلال 24 ساعة\n📞 للاستفسار: 733071578`);
+    bot.sendMessage(chatId, `✅ تم استلام واجبك!\n\nسنقوم بالحل خلال 24 ساعة\n📞 للاستفسار: @Almariffah`);
     waitingForAssignment[chatId] = false;
     return;
   }
@@ -715,25 +738,20 @@ function handleCVData(chatId, messageText) {
 // 📤 إرسال الرسائل للمسؤول
 function sendToAdmin(chatId, message) {
   try {
-    bot.sendMessage(733071578, message);
+    bot.sendMessage('@Almariffah', message);
     console.log(`📨 رسالة جديدة من ${chatId}`);
   } catch (error) {
     console.log('❌ خطأ في إرسال الرسالة للمسؤول');
   }
 }
 
-// 🛠️ معالجة الأخطاء
-bot.on('polling_error', (error) => {
-  console.error('❌ خطأ في البولينج:', error);
-});
-
 // تشغيل البوت
 console.log('🚀 بوت PlatformSAK يعمل بنجاح!');
-console.log('📞 للتواصل: 733071578');
+console.log('📞 للتواصل: @Almariffah');
 console.log('📧 البريد: alslahyamr1@gmail.com');
 
 try {
-  bot.sendMessage(733071578, '✅ البوت يعمل الآن وجاهز لاستقبال الطلبات!');
+  bot.sendMessage('@Almariffah', '✅ البوت يعمل الآن وجاهز لاستقبال الطلبات!');
 } catch (error) {
   console.log('⚠️ لم يتم إرسال رسالة البدء للمسؤول');
-      }
+  }
