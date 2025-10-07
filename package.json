@@ -1,0 +1,15 @@
+{
+  "name": "platformsak-bot",
+  "version": "2.0.0",
+  "description": "بوت تيليجرام للخدمات التعليمية - PlatformSAK",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0"
+  },
+  "keywords": ["telegram", "bot", "education"],
+  "author": "PlatformSAK",
+  "license": "MIT"
+}
